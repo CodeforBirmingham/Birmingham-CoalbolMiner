@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 '''
 The MIT License (MIT)
 
@@ -26,33 +24,49 @@ SOFTWARE.
 '''
 
 '''
-This is a test script for converting some example
-data and storing it into a sqlite3 database
+This is a simple class for managing our
+configuration
 '''
 
-import src.cbminer as cbminer
+import ConfigParser
 
-if __name__ == '__main__':
-    cbminer.ConfigManager.get_instance().load()
+class ConfigManager(object):
+    _instance = None
     
-    # Create a default database
-    db = cbminer.Database()
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = ConfigManager()
+            
+        return cls._instance
 
-    # Build our importer
-    i = cbminer.Importer(db, 'examples/data/schema.csv', 'examples/data/payroll.csv')
+    def load(self):
+        cp = ConfigParser.ConfigParser()
 
-    # build the schema tables
-    tables = i.build_tables()
+        try:
+            cp.read('cbminer.ini')
+        except Exception, e:
+            print 'exception', e
+            pass
 
-    # Find the employee table
-    Employee = tables['Employee']
-    # Import the employee payroll table
-    i.read_data(Employee)
+        print cp.sections()
+        print cp.has_section("database")
+        
+        if cp.has_option("database", "connection_string"):
+            print 'has option'
+            self.dbstring = cp.get("database", "connection_string")
+        print 'dbstring=', self.dbstring
+        
+    def save(self):
+        cp = ConfigParser.ConfigParser()
+        cp.add_section("database")
+            
+        if self.dbstring:
+            cp.set("database", "connection_string", self.dbstring)
 
-    # do some test queries
-    print '='*50
+        with open('cbminer.ini', 'w') as f:
+            cp.write(f)
+            
+    def __init__(self):
+        self.dbstring = None
 
-    for e in db.session.query(Employee):
-        print 'e=', e.Employee_No, e.Employee_First_Name, e.Employee_Last_Name
-
-    cbminer.ConfigManager.get_instance().save()

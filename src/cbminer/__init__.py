@@ -26,3 +26,4 @@ SOFTWARE.
 
 from Importer import Importer
 from Database import Database
+from ConfigManager import ConfigManager
