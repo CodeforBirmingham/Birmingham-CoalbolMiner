@@ -29,30 +29,51 @@ SOFTWARE.
 This is a test script for converting some example
 data and storing it into a sqlite3 database
 '''
+import sys
+import argparse
 
 import src.cbminer as cbminer
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('schema', metavar = 'schema',
+                        nargs = 1, help = 'The schema CSV file')
+    parser.add_argument('-t', '--table', metavar = 'tablename tablecsv',
+                        nargs = 2, action = "append",
+                        help = 'The table name and the csv file')
+    
+
+    args = parser.parse_args()
+    
     cbminer.ConfigManager.get_instance().load()
     
     # Create a default database
     db = cbminer.Database()
 
     # Build our importer
-    i = cbminer.Importer(db, 'examples/data/schema.csv', 'examples/data/payroll.csv')
+    i = cbminer.Importer(db, args.schema[0])
 
-    # build the schema tables
-    tables = i.build_tables()
+    success_count = 0
+    
+    for table, csv in args.table:
+        # Find the employee table
+        T = i.tables.get(table, None)
+        if T:
+            # Import the employee payroll table
+            try:
+                i.parse_table_data(T, csv)
+                success_count += 1
+            except Exception, e:
+                print >> sys.stderr, '== Error importing table %s: %s ==' % (table, e)
+        else:
+            print >> sys.stderr, '== Error: Invalid table %s ==' % table
 
-    # Find the employee table
-    Employee = tables['Employee']
-    # Import the employee payroll table
-    i.read_data(Employee)
-
-    # do some test queries
-    print '='*50
-
-    for e in db.session.query(Employee):
-        print 'e=', e.Employee_No, e.Employee_First_Name, e.Employee_Last_Name
-
+    print ''
+    if success_count == len(args.table):
+        print 'Successfully imported data.'
+    elif success_count > 0:
+        print 'Successfully imported SOME of the data.'
+    else:
+        print 'Failed to import any data.'
+            
     cbminer.ConfigManager.get_instance().save()

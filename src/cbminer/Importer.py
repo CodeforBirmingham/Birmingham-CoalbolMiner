@@ -42,6 +42,7 @@ class Importer(object):
     #!mwd - These shouldn't be hardcoded
     # But without hardcoding, it's hard
     #  to automate this process
+    # Hopefully the schema files are consistent!
     TABLE_NAME = 'table name'
     KEY_FIELD = 'Key Fields'
     COLUMN_NAME = 'sql field name'
@@ -49,14 +50,16 @@ class Importer(object):
     LENGTH = 'length'
     COLUMN_MAP = 'Worksheet Column'
     
-    def __init__(self, db, schema, datafile):
+    def __init__(self, db, schema):
         self._db = db
         self._schema = schema
-        self._datafile = datafile
 
         self._column_mapper = {}
 
-    def build_tables(self):
+        # go ahead an parse
+        self.tables = self._parse_schema()
+
+    def _parse_schema(self):
         '''
         Read the schema and build the required
         sql tables.
@@ -177,7 +180,7 @@ class Importer(object):
             
         return tables
     
-    def read_data(self, TableKlass):
+    def parse_table_data(self, TableKlass, filename):
         '''
         After we've parsed the schema file,
         we can now parse the actual data.
@@ -189,7 +192,7 @@ class Importer(object):
         and insert into the sql database.
         '''
         # parse the datafile
-        f = open(self._datafile, 'rb')
+        f = open(filename, 'rb')
         c = csv.reader(f)
 
         # skip the header, it's frickin useless

@@ -49,13 +49,8 @@ class ConfigManager(object):
             print 'exception', e
             pass
 
-        print cp.sections()
-        print cp.has_section("database")
-        
         if cp.has_option("database", "connection_string"):
-            print 'has option'
             self.dbstring = cp.get("database", "connection_string")
-        print 'dbstring=', self.dbstring
         
     def save(self):
         cp = ConfigParser.ConfigParser()
