@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+'''
+The MIT License (MIT)
+
+Copyright (c) 2015 @ CodeForBirmingham (http://codeforbirmingham.org)
+@Author: Marcus Dillavou <marcus.dillavou@codeforbirmingham.org>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+'''
+
+'''
+This is a test script for converting some example
+data and storing it into a sqlite3 database
+'''
+
+import src.cbminer as cbminer
+
+if __name__ == '__main__':
+    # Create a default database
+    db = cbminer.Database()
+
+    # Build our importer
+    i = cbminer.Importer(db, 'examples/data/schema.csv', 'examples/data/payroll.csv')
+
+    # build the schema tables
+    tables = i.build_tables()
+
+    # Find the employee table
+    Employee = tables['Employee']
+    # Import the employee payroll table
+    i.read_data(Employee)
+
+    # do some test queries
+    print '='*50
+
+    for e in db.session.query(Employee):
+        print 'e=', e.Employee_No, e.Employee_First_Name, e.Employee_Last_Name
+
