@@ -31,6 +31,8 @@ import SimpleHTTPServer
 import urlparse
 import json
 import cgi
+import fnmatch
+import mimetypes
 from StringIO import StringIO
 
 import src.cbminer as cbminer
@@ -52,6 +54,7 @@ class Router(object):
     METHOD_TYPE_POST = 0
     METHOD_TYPE_GET = 1
     HANDLERS = {}
+
 
 '''
 This is a decorator to setup routes
@@ -138,11 +141,18 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.wfile.write(resp['body'])
 
 
+    def _get_route(self, path):
+        for route in Router.HANDLERS:
+            if fnmatch.fnmatch(path, route):
+                return Router.HANDLERS[route]
+        return None
+        
     def _run(self, path, method, *args, **kwargs):
         try:
-            if path in Router.HANDLERS:
-                if method in Router.HANDLERS[path]:
-                    return Router.HANDLERS[path][method](self, *args, **kwargs)
+            route = self._get_route(path)
+            if route:
+                if method in route:
+                    return route[method](self, *args, **kwargs)
                 else:
                     raise MethodNotAllowedException()
             else:
@@ -177,15 +187,122 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 'body': body}
 
     @route('/config/database')
-    def update_database(self, dbtype, location, port = None, username = None, password = None):
-        print 'update_database', dbtype, location, port, username, password
+    def update_database(self, dbtype, **kwargs):
+    #def update_database(self, dbtype, location, port = None, username = None, password = None):
+        print 'update_database', dbtype, kwargs
         
         cm = cbminer.ConfigManager.get_instance()
         
         dbstring = ''
-        
-        if dbtype.lower() == 'sqlite':
-            dbstring = "sqlite:///" + location
+
+        dbtype = dbtype.lower()
+        if dbtype == 'sqlite':
+            if 'location' not in kwargs:
+                raise BadRequestException("Missing location argument")
+            dbstring = "sqlite:///" + kwargs['location']
+        elif dbtype == 'postgres':
+            if 'dbname' not in kwargs:
+                raise BadRequestException("Missing dbname argument")
+            dbstring = "postgresql"
+            if 'driver' in kwargs:
+                if kwargs['driver'].lower() == 'pg8000':
+                    dbstring += "+pg8000://"
+                else:
+                    dbstring += "://"
+            else:
+                dbstring += "://"
+                
+            if 'username' in kwargs:
+                dbstring += kwargs['username']
+                if 'password' in kwargs:
+                    dbstring += ':' + kwargs['password']
+                dbstring += '@'
+
+            if 'host' in kwargs:
+                dbstring += kwargs['host'] + '/'
+            else:
+                dbstring += 'localhost' + '/'
+
+            dbstring += kwargs['dbname']
+                    
+        elif dbtype == 'mysql':
+            if 'dbname' not in kwargs:
+                raise BadRequestException("Missing dbname argument")
+            dbstring = "mysql"
+            if 'driver' in kwargs:
+                if kwargs['driver'].lower() == 'connector':
+                    dbstring += "+mysqlconnector://"
+                elif kwargs['driver'].lower() == 'oursql':
+                    dbstring += '+oursql://'
+                else:
+                    dbstring += "://"
+            else:
+                dbstring += "://"
+                
+            if 'username' in kwargs:
+                dbstring += kwargs['username']
+                if 'password' in kwargs:
+                    dbstring += ':' + kwargs['password']
+                dbstring += '@'
+
+            if 'host' in kwargs:
+                dbstring += kwargs['host'] + '/'
+            else:
+                dbstring += 'localhost' + '/'
+
+            dbstring += kwargs['dbname']
+        elif dbtype == 'mssql':
+            dbstring = "mssql"
+            if 'driver' in kwargs:
+                if kwargs['driver'].lower() == 'pymssql':
+                    dbstring += "+pymssql://"
+                else:
+                    dbstring += "+pyodbc://"
+            else:
+                dbstring += "+pyodbc://"
+                
+            if 'username' in kwargs:
+                dbstring += kwargs['username']
+                if 'password' in kwargs:
+                    dbstring += ':' + kwargs['password']
+                dbstring += '@'
+
+            if 'host' in kwargs:
+                dbstring += kwargs['host']
+                if 'port' in kwargs:
+                    dbstring += ':' + kwargs['port']
+                dbstring += '/'
+
+            dbstring += kwargs['dbname']
+
+        elif dbtype == 'oracle':
+            if 'dbname' not in kwargs:
+                raise BadRequestException("Missing dbname argument")
+
+            dbstring = 'oracle'
+            if 'driver' in kwargs:
+                if kwargs['driver'].lower() == 'cx':
+                    dbstring += '+cx_oracle://'
+                else:
+                    dbstring += '://'
+            else:
+                dbstring += '://'
+
+            if 'username' in kwargs:
+                dbstring += kwargs['username']
+                if 'password' in kwargs:
+                    dbstring += ':' + kwargs['password']
+                dbstring += '@'
+
+            if 'host' in kwargs:
+                dbstring += kwargs['host']
+                if 'port' in kwargs:
+                    dbstring += ':' + kwargs['port']
+                dbstring += '/'
+
+
+            dbstring += kwargs['dbname']
+            
         else:
             raise Exception('unknown db type')
 
@@ -232,8 +349,27 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                                         'error': e.message})}
 
 
+    @route('/js/*', Router.METHOD_TYPE_GET)
+    def get_js(self):
+        return self._get_file()
 
-        
-        
+    @route('/images/*', Router.METHOD_TYPE_GET)
+    def get_image(self):
+        return self._get_file()
 
+    @route('/css/*', Router.METHOD_TYPE_GET)
+    def get_css(self):
+        return self._get_file()
+
+    def _get_file(self):
+        p = urlparse.urlparse(self.path)
+        path = p.path
         
+        try:
+            full_path = './data/server' + path
+            mime = mimetypes.guess_type(full_path)[0]
+            f = open(full_path)
+            return {'headers': {'Content-type:': mime},
+                    'body': f.read()}
+        except IOError, e:
+            raise NotFoundException()
