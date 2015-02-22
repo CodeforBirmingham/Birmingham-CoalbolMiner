@@ -1,53 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CB Miner</title>
 
-    <!-- Bootstrap -->
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CB Miner</title>
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+  <!-- Bootstrap -->
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
       <![endif]-->
-  </head>
-  <body>
-    <div id="dbConfigDiv">
+</head>
+
+<body>
+
+    <div id="dbConfigDiv col-xs-12">
       <h2>Database Configuration</h2>
-    </div>
+      <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+          Database
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+          <li role="presentation" class="dropdown-header">Select a database</li>
+          <li id="postgresql" role="presentation">postgresql</li>
+          <li id="mysql" role="presentation">mysql</li>
+          <li id="microsoft_sql" role="presentation">microsoft sql</li>
+          <li id="sqlite" role="presentation">sqlite</li>
+        </ul>
+        <div class="hidden Form_Postgresql">
+          <p>
+            postgresql options
+          </p>
+        </div>
+        <div class="hidden Form_Mysql">
+          <p>
+            mysql options
+          </p>
+        </div>
+        <div class="hidden Form_Microsoftsql">
+          <p>
+            Microsoft SQL options
+          </p>
+        </div>
+        <div class="hidden Form_Sqlite">
+          <p>
+            sqlite options
+          </p>
+        </div>
 
-    <div id="schemaDiv">
+        <button class="DatabaseSubmit btn btn-primary" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+    <div id="schemaDiv" class="col-xs-12">
       <h2>Upload a Schema</h2>
-      <form id="schemaUploadForm" enctype="multipart/form-data" name="schemaUploadForm" >
-	<input type="file" name="schema">
-	<input type="submit" name="submit">
+      <form id="schemaUploadForm" enctype="multipart/form-data" name="schemaUploadForm">
+        <input type="file" name="schema">
+        <button class="SubmitSchema btn btn-primary" type="button">Submit</button>
       </form>
     </div>
 
-    <div id="tableDiv">
-      <h2>Upload a Table</h2>
-      <form id="tableUploadForm" enctype="multipart/form-data" name="tableUploadForm" >
-	<input type="file" name="table">
-	<input type="submit" name="submit">
-      </form>
+  <div id="tableDiv" class="col-xs-12">
+    <h2>Upload a Table</h2>
+    <div class="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+        select table
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+        <li id="postgresql" role="presentation">table1</li>
+        <li id="mysql" role="presentation">table2</li>
+        <li id="microsoft_sql" role="presentation">table3</li>
+      </ul>
+      <button class="DatabaseSubmit btn btn-primary" type="button">Next</button>
     </div>
-    
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <form id="tableUploadForm" enctype="multipart/form-data" name="tableUploadForm">
+      <input type="file" name="table">
+      <button class="SubmitSchema btn btn-primary" type="button">Next</button>
+    </form>
+  </div>
 
-    <script>
-      $('#uploadForm').submit(function (e) {
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+  <script>
+    $('#uploadForm').submit(function(e) {
       console.log("submit");
 
       var data;
@@ -55,34 +105,35 @@
       console.log("" + this);
 
       var t = this;
-      
+
       data = new FormData(t);
       //data.append('file', $('#file')[0].files[0]);
       console.log(data);
-      
+
       $.ajax({
-      url: '/submit/schema',
-      data: data,
-      processData: false,
-      type: 'POST',
+        url: '/submit/schema',
+        data: data,
+        processData: false,
+        type: 'POST',
 
-      // This will override the content type header,
-      // regardless of whether content is actually sent.
-      // Defaults to 'application/x-www-form-urlencoded'
-      //contentType: 'multipart/form-data',
-      contentType: false,
+        // This will override the content type header,
+        // regardless of whether content is actually sent.
+        // Defaults to 'application/x-www-form-urlencoded'
+        //contentType: 'multipart/form-data',
+        contentType: false,
 
-      // Now you should be able to do this:
-      //mimeType: 'multipart/form-data',    //Property added in 1.5.1
+        // Now you should be able to do this:
+        //mimeType: 'multipart/form-data',    //Property added in 1.5.1
 
-      success: function (data) {
-      alert(data);
-      }
+        success: function(data) {
+          alert(data);
+        }
       });
 
-          e.preventDefault();
-      });
-    </script>
+      e.preventDefault();
+    });
+  </script>
 
-  </body>
+</body>
+
 </html>
