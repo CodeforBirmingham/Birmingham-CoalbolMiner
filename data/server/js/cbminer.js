@@ -1,12 +1,19 @@
-function get_db_config() {
-
+function get_db_config(f) {
+    console.log("get config");
+    $.ajax({
+	url: "/config/database",
+	type: 'GET',
+	success: function(r) {
+	    f(r);
+	}
+    });
 }
 
-function set_db_config() {
+function set_db_config(f) {
     
 }
 
-function upload_schema(form) {
+function upload_schema(form, f) {
     var data;
     data = new FormData(form);
 
@@ -17,13 +24,13 @@ function upload_schema(form) {
 	type: 'POST',
 	contentType: false,
 	success: function(r) {
-	    alert(r);
+	    f(r);
 	}
     });
     
 }
 
-function upload_table(form) {
+function upload_table(form, f) {
     var data;
     data = new FormData(form);
 
@@ -34,7 +41,7 @@ function upload_table(form) {
 	type: 'POST',
 	contentType: false,
 	success: function(r) {
-
+	    f(r);
 	}
     });
 }
