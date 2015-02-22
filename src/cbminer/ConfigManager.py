@@ -79,14 +79,10 @@ class ConfigManager(object):
         self._cp.remove_section(section)
         
     def get_options(self, section):
-        print 'get options'
         self._load()
-        print 'after load'
 
         options = {}
-        print self._cp.items(section)
         for i in self._cp.items(section):
-            print 'i=', i
             options[i[0]] = i[1]
 
         return options

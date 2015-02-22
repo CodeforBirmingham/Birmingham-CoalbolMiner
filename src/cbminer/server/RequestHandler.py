@@ -209,12 +209,11 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     @route('/config/database', Router.METHOD_TYPE_GET)
     def get_database(self):
-        print 'get_database'
         cm = cbminer.ConfigManager.get_instance()
 
         options = cm.get_options('Database')
 
-        return {'headers': {'Content-Type:', 'application/json'},
+        return {'headers': {'Content-Type:': 'application/json'},
                 'body': json.dumps(options)}
     
     @route('/submit/schema')
