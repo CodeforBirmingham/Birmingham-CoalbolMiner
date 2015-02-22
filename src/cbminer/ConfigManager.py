@@ -37,10 +37,19 @@ class ConfigManager(object):
     def get_instance(cls):
         if cls._instance is None:
             cls._instance = ConfigManager()
+            cls._instance._load()
             
         return cls._instance
 
-    def load(self):
+    def reload(self):
+        _loaded = False
+
+        self._load()
+    
+    def _load(self):
+        if self._loaded:
+            return
+        
         cp = ConfigParser.ConfigParser()
 
         try:
@@ -51,6 +60,8 @@ class ConfigManager(object):
 
         if cp.has_option("database", "connection_string"):
             self.dbstring = cp.get("database", "connection_string")
+
+        self._loaded = True
         
     def save(self):
         cp = ConfigParser.ConfigParser()
@@ -63,5 +74,6 @@ class ConfigManager(object):
             cp.write(f)
             
     def __init__(self):
+        self._loaded = False
         self.dbstring = None
 

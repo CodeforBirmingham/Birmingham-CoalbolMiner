@@ -77,7 +77,13 @@ class Importer(object):
         #  so we don't to it twice
         sqltables = {}
 
-        f = open(self._schema, 'rb')
+        # the schema could be a file on disk
+        #  or an opened instance
+        if isinstance(self._schema, str):
+            f = open(self._schema, 'rb')
+        else:
+            f = self._schema
+            
         c = csv.DictReader(f)
         
         for row in c:
@@ -190,9 +196,16 @@ class Importer(object):
         
         This will parse everything, convert formats,
         and insert into the sql database.
+
+        @return the number of rows parsed
         '''
-        # parse the datafile
-        f = open(filename, 'rb')
+        # The datafile could be a file on disk
+        #  or an opened filelike instance
+        if isinstance(filename, str):
+            f = open(filename, 'rb')
+        else:
+            f = filename
+            
         c = csv.reader(f)
 
         # skip the header, it's frickin useless
@@ -200,6 +213,7 @@ class Importer(object):
         #  the schema file anyway
         c.next()
 
+        count = 0
         for row in c:
             # It is possible to to create a new
             #  instace of the table, and start
@@ -247,7 +261,11 @@ class Importer(object):
             #  to prep it for insertion
             self._db.session.add(t)
 
+            count += 1
+
         # Commit everything. This will
         #  do all the changes at once
         self._db.session.commit()
+
+        return count
     

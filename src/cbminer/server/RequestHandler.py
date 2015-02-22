@@ -31,6 +31,7 @@ import SimpleHTTPServer
 import urlparse
 import json
 import cgi
+from StringIO import StringIO
 
 import src.cbminer as cbminer
 
@@ -67,6 +68,12 @@ class route:
             return f
 
 class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    def setup(self):
+        self._db = cbminer.Database()
+        self._importer = None
+
+        SimpleHTTPServer.SimpleHTTPRequestHandler.setup(self)
+    
     def do_GET(self):
         p = urlparse.urlparse(self.path)
         path = p.path
@@ -114,6 +121,9 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 kwargs = json.loads(form.getvalue('data'))
                 if not isinstance(kwargs, dict):
                     kwargs = {}
+        elif ctype == 'multipart/form-data':
+            print 'multi-form', self.headers
+            kwargs = cgi.parse_multipart(self.rfile, pdict)
         else:
             raise BadRequestException("Invalid content type: %s" % ctype)
 
@@ -171,7 +181,6 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print 'update_database', dbtype, location, port, username, password
         
         cm = cbminer.ConfigManager.get_instance()
-        cm.load()
         
         dbstring = ''
         
@@ -184,6 +193,47 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         cm.save()
 
+        # reload the db
+        self._db = cbminer.Database()
+
         return {'headers': {'Content-type:': 'application/json'},
                 'body': json.dumps({'result': 0})}
+
+    @route('/submit/schema')
+    def submit_schema(self, schema):
+        # hmm, convert this into a file like object
+        s = StringIO(schema)
+        
+        self._importer = cbminer.Importer(self._db, s)
+
+        return {'headers': {'Content-type:': 'application/json'},
+                'body': json.dumps({'tables': self._importer.tables.keys()})}
+
+    @route('/submit/data')
+    def submit_data(self, table_name, data):
+        try:
+            if self._importer is None:
+                raise Exception("You must submit a schema first")
+
+            T = self._importer.tables.get(table_name, None)
+            if T is None:
+                raise Exception("The table (%s) doesn't exist in the schema" % (table_name))
+
+            s = StringIO(data)
+            count = self._importer.parse_table_data(T, s)
+
+            return {'headers': {'Content-type:': 'application/json'},
+                    'body': json.dumps({'count': count})}
+
+
+        except Exception, e:
+            return {'headers': {'Content-type:': 'application/json'},
+                    'body': json.dumps({'result': 1,
+                                        'error': e.message})}
+
+
+
+        
+        
+
         

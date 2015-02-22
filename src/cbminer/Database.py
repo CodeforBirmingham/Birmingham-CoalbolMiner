@@ -36,6 +36,7 @@ from ConfigManager import ConfigManager
 class Database(object):
     def __init__(self):
         cm = ConfigManager.get_instance()
+        
         if not cm or cm.dbstring is None:
             raise Exception("Please configure the database first in the cbminer.ini")
         

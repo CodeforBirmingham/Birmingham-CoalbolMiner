@@ -45,8 +45,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     
-    cbminer.ConfigManager.get_instance().load()
-    
     # Create a default database
     db = cbminer.Database()
 
