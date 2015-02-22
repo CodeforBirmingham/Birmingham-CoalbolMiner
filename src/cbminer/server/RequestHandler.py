@@ -194,10 +194,10 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print 'update_database', kwargs
         
         cm = cbminer.ConfigManager.get_instance()
-        cm.clear()
+        cm.clear_section('Database')
 
         for k, v in kwargs:
-            cm.__setattr__(k, v)
+            cm.set_option('Database', k, v)
 
         cm.save()
 
