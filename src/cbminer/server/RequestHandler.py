@@ -72,7 +72,11 @@ class route:
 
 class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def setup(self):
-        self._db = cbminer.Database()
+        try:
+            self._db = cbminer.Database()
+        except Exception, e:
+            self._db = None
+            
         self._importer = None
 
         SimpleHTTPServer.SimpleHTTPRequestHandler.setup(self)
