@@ -129,7 +129,6 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 if not isinstance(kwargs, dict):
                     kwargs = {}
         elif ctype == 'multipart/form-data':
-            print 'multi-form', self.headers
             kwargs = cgi.parse_multipart(self.rfile, pdict)
         else:
             raise BadRequestException("Invalid content type: %s" % ctype)
@@ -323,8 +322,10 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     @route('/submit/schema')
     def submit_schema(self, schema):
         # hmm, convert this into a file like object
-        s = StringIO(schema)
-        
+        # This comes in as a list, we just
+        #  want the first one
+        s = StringIO(schema[0])
+
         self._importer = cbminer.Importer(self._db, s)
 
         return {'headers': {'Content-type:': 'application/json'},
@@ -340,7 +341,8 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             if T is None:
                 raise Exception("The table (%s) doesn't exist in the schema" % (table_name))
 
-            s = StringIO(data)
+            # this comes in as a list, take the first time
+            s = StringIO(data[0])
             count = self._importer.parse_table_data(T, s)
 
             return {'headers': {'Content-type:': 'application/json'},
