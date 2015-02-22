@@ -30,6 +30,15 @@ configuration
 
 import ConfigParser
 
+'''
+Same config file:
+
+[CBMiner]
+dbengine = postgres
+dbhost = localhost
+dbname = cbminer
+dbdriver = psycopg2
+'''
 class ConfigManager(object):
     _instance = None
     
@@ -50,30 +59,39 @@ class ConfigManager(object):
         if self._loaded:
             return
         
-        cp = ConfigParser.ConfigParser()
+        self._cp = ConfigParser.ConfigParser()
+
+        if not self._cp.has_section('CBMiner'):
+            self._cp.add_section('CBMiner')
 
         try:
-            cp.read('cbminer.ini')
+            self._cp.read('cbminer.ini')
         except Exception, e:
             print 'exception', e
             pass
 
-        if cp.has_option("database", "connection_string"):
-            self.dbstring = cp.get("database", "connection_string")
-
         self._loaded = True
         
     def save(self):
-        cp = ConfigParser.ConfigParser()
-        cp.add_section("database")
-            
-        if self.dbstring:
-            cp.set("database", "connection_string", self.dbstring)
-
         with open('cbminer.ini', 'w') as f:
-            cp.write(f)
+            self._cp.write(f)
+
+    def __getattr__(self, name):
+        cp = self.__dict__.get('_cp')
+        if cp:
+            if cp.has_option('CBMiner', name):
+                return cp.get('CBMiner', name)
+
+        raise AttributeError("No attribute: " + name)
+
+    def __setattr__(self, name, value):
+        cp = self.__dict__.get('_cp')
+        if cp:
+            return cp.set('CBMiner', name, value)
+
+        return object.__setattr__(self, name, value)
             
     def __init__(self):
         self._loaded = False
-        self.dbstring = None
+        self._cp = None
 

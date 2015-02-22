@@ -35,16 +35,125 @@ from ConfigManager import ConfigManager
 
 class Database(object):
     def __init__(self):
-        cm = ConfigManager.get_instance()
+        self._dbstring = None
+        self._build_database_connection()
         
-        if not cm or cm.dbstring is None:
+        if self._dbstring is None:
             raise Exception("Please configure the database first in the cbminer.ini")
         
         # This is a test, this should
         #  come from a configuration
-        #self.engine = sqlalchemy.create_engine('sqlite:///:memory:', echo = True)
         #self.engine = sqlalchemy.create_engine('sqlite:///test.sqlite3')
-        self.engine = sqlalchemy.create_engine(cm.dbstring)
+        self.engine = sqlalchemy.create_engine(self._dbstring)
 
         SessionKlass = sqlalchemy.orm.sessionmaker(bind = self.engine)
         self.session = SessionKlass()
+
+    def _build_database_connection(self):
+        cm = ConfigManager.get_instance()
+
+        if not hasattr(cm, 'dbname'):
+            raise Exception("Please configure the database first in the cbminer.ini")
+        
+        dbstring = ''
+
+        dbtype = cm.dbengine.lower()
+        if dbtype == 'sqlite':
+            dbstring = "sqlite:///" + cm.dbname
+        elif dbtype == 'postgres':
+            dbstring = "postgresql"
+            if hasattr(cm, 'dbdriver'):
+                if cm.dbdriver.lower() == 'pg8000':
+                    dbstring += "+pg8000://"
+                else:
+                    dbstring += "://"
+            else:
+                dbstring += "://"
+                
+            if hasattr(cm, 'dbusername'):
+                dbstring += cm.dbusername
+                if hasattr(cm, 'dbpassword'):
+                    dbstring += ':' + cm.dbpassword
+                dbstring += '@'
+
+            if hasattr(cm, 'dbhost'):
+                dbstring += cm.dbhost + '/'
+            else:
+                dbstring += 'localhost' + '/'
+
+            dbstring += cm.dbname
+                    
+        elif dbtype == 'mysql':
+            dbstring = "mysql"
+            if hasattr(cm, 'dbdriver'):
+                if cm.dbdriver.lower() == 'connector':
+                    dbstring += "+mysqlconnector://"
+                elif cm.dbdriver.lower() == 'oursql':
+                    dbstring += '+oursql://'
+                else:
+                    dbstring += "://"
+            else:
+                dbstring += "://"
+                
+            if hasattr(cm, 'dbusername'):
+                dbstring += cm.dbusername
+                if hasattr(cm, 'dbpassword'):
+                    dbstring += ':' + cm.dbpassword
+                dbstring += '@'
+
+            if hasattr(cm, 'dbhost'):
+                dbstring += cm.dbhost + '/'
+            else:
+                dbstring += 'localhost' + '/'
+
+            dbstring += cm.dbname
+        elif dbtype == 'mssql':
+            dbstring = "mssql"
+            if hasattr(cm, 'dbdriver'):
+                if cm.dbdriver.lower() == 'pymssql':
+                    dbstring += "+pymssql://"
+                else:
+                    dbstring += "+pyodbc://"
+            else:
+                dbstring += "+pyodbc://"
+                
+            if hasattr(cm, 'dbusername'):
+                dbstring += cm.dbusername
+                if hasattr(cm, 'dbpassword'):
+                    dbstring += ':' + cm.dbpassword
+                dbstring += '@'
+
+            if hasattr(cm, 'dbhost'):
+                dbstring += cm.dbhost
+                if hasattr(cm, 'dbport'):
+                    dbstring += ':' + cm.dbport
+                dbstring += '/'
+
+            dbstring += cm.dbname
+
+        elif dbtype == 'oracle':
+            dbstring = 'oracle'
+            if hasattr(cm, 'dbdriver'):
+                if cm.dbdriver.lower() == 'cx':
+                    dbstring += '+cx_oracle://'
+                else:
+                    dbstring += '://'
+            else:
+                dbstring += '://'
+
+            if hasattr(cm, 'dbusername'):
+                dbstring += cm.dbusername
+                if hasattr(cm, 'dbpassword'):
+                    dbstring += ':' + cm.dbpassword
+                dbstring += '@'
+
+            if hasattr(cm, 'dbhost'):
+                dbstring += cm.dbhost
+                if hasattr(cm, 'dbport'):
+                    dbstring += ':' + cm.dbport
+                dbstring += '/'
+
+
+            dbstring += cm.dbname
+
+        self._dbstring = dbstring
