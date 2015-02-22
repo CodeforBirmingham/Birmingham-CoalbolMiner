@@ -67,8 +67,8 @@ class route:
     def __call__(self, f):
         if self.path not in Router.HANDLERS:
             Router.HANDLERS[self.path] = {}
-            Router.HANDLERS[self.path][self.method] = f
-            return f
+        Router.HANDLERS[self.path][self.method] = f
+        return f
 
 class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def setup(self):
@@ -190,126 +190,14 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 'body': body}
 
     @route('/config/database')
-    def update_database(self, dbtype, **kwargs):
-    #def update_database(self, dbtype, location, port = None, username = None, password = None):
-        print 'update_database', dbtype, kwargs
+    def update_database(self, **kwargs):
+        print 'update_database', kwargs
         
         cm = cbminer.ConfigManager.get_instance()
-        
-        dbstring = ''
+        cm.clear()
 
-        dbtype = dbtype.lower()
-        if dbtype == 'sqlite':
-            if 'location' not in kwargs:
-                raise BadRequestException("Missing location argument")
-            dbstring = "sqlite:///" + kwargs['location']
-        elif dbtype == 'postgres':
-            if 'dbname' not in kwargs:
-                raise BadRequestException("Missing dbname argument")
-            dbstring = "postgresql"
-            if 'driver' in kwargs:
-                if kwargs['driver'].lower() == 'pg8000':
-                    dbstring += "+pg8000://"
-                else:
-                    dbstring += "://"
-            else:
-                dbstring += "://"
-                
-            if 'username' in kwargs:
-                dbstring += kwargs['username']
-                if 'password' in kwargs:
-                    dbstring += ':' + kwargs['password']
-                dbstring += '@'
-
-            if 'host' in kwargs:
-                dbstring += kwargs['host'] + '/'
-            else:
-                dbstring += 'localhost' + '/'
-
-            dbstring += kwargs['dbname']
-                    
-        elif dbtype == 'mysql':
-            if 'dbname' not in kwargs:
-                raise BadRequestException("Missing dbname argument")
-            dbstring = "mysql"
-            if 'driver' in kwargs:
-                if kwargs['driver'].lower() == 'connector':
-                    dbstring += "+mysqlconnector://"
-                elif kwargs['driver'].lower() == 'oursql':
-                    dbstring += '+oursql://'
-                else:
-                    dbstring += "://"
-            else:
-                dbstring += "://"
-                
-            if 'username' in kwargs:
-                dbstring += kwargs['username']
-                if 'password' in kwargs:
-                    dbstring += ':' + kwargs['password']
-                dbstring += '@'
-
-            if 'host' in kwargs:
-                dbstring += kwargs['host'] + '/'
-            else:
-                dbstring += 'localhost' + '/'
-
-            dbstring += kwargs['dbname']
-        elif dbtype == 'mssql':
-            dbstring = "mssql"
-            if 'driver' in kwargs:
-                if kwargs['driver'].lower() == 'pymssql':
-                    dbstring += "+pymssql://"
-                else:
-                    dbstring += "+pyodbc://"
-            else:
-                dbstring += "+pyodbc://"
-                
-            if 'username' in kwargs:
-                dbstring += kwargs['username']
-                if 'password' in kwargs:
-                    dbstring += ':' + kwargs['password']
-                dbstring += '@'
-
-            if 'host' in kwargs:
-                dbstring += kwargs['host']
-                if 'port' in kwargs:
-                    dbstring += ':' + kwargs['port']
-                dbstring += '/'
-
-            dbstring += kwargs['dbname']
-
-        elif dbtype == 'oracle':
-            if 'dbname' not in kwargs:
-                raise BadRequestException("Missing dbname argument")
-
-            dbstring = 'oracle'
-            if 'driver' in kwargs:
-                if kwargs['driver'].lower() == 'cx':
-                    dbstring += '+cx_oracle://'
-                else:
-                    dbstring += '://'
-            else:
-                dbstring += '://'
-
-            if 'username' in kwargs:
-                dbstring += kwargs['username']
-                if 'password' in kwargs:
-                    dbstring += ':' + kwargs['password']
-                dbstring += '@'
-
-            if 'host' in kwargs:
-                dbstring += kwargs['host']
-                if 'port' in kwargs:
-                    dbstring += ':' + kwargs['port']
-                dbstring += '/'
-
-
-            dbstring += kwargs['dbname']
-            
-        else:
-            raise Exception('unknown db type')
-
-        cm.dbstring = dbstring
+        for k, v in kwargs:
+            cm.__setattr__(k, v)
 
         cm.save()
 
@@ -319,6 +207,16 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         return {'headers': {'Content-type:': 'application/json'},
                 'body': json.dumps({'result': 0})}
 
+    @route('/config/database', Router.METHOD_TYPE_GET)
+    def get_database(self):
+        print 'get_database'
+        cm = cbminer.ConfigManager.get_instance()
+
+        options = cm.get_options('Database')
+
+        return {'headers': {'Content-Type:', 'application/json'},
+                'body': json.dumps(options)}
+    
     @route('/submit/schema')
     def submit_schema(self, schema):
         # hmm, convert this into a file like object

@@ -34,10 +34,12 @@ import ConfigParser
 Same config file:
 
 [CBMiner]
-dbengine = postgres
-dbhost = localhost
-dbname = cbminer
-dbdriver = psycopg2
+option = 1
+[Database]
+engine = postgres
+host = localhost
+name = cbminer
+driver = psycopg2
 '''
 class ConfigManager(object):
     _instance = None
@@ -61,9 +63,6 @@ class ConfigManager(object):
         
         self._cp = ConfigParser.ConfigParser()
 
-        if not self._cp.has_section('CBMiner'):
-            self._cp.add_section('CBMiner')
-
         try:
             self._cp.read('cbminer.ini')
         except Exception, e:
@@ -71,26 +70,38 @@ class ConfigManager(object):
             pass
 
         self._loaded = True
-        
+
     def save(self):
         with open('cbminer.ini', 'w') as f:
             self._cp.write(f)
 
-    def __getattr__(self, name):
-        cp = self.__dict__.get('_cp')
-        if cp:
-            if cp.has_option('CBMiner', name):
-                return cp.get('CBMiner', name)
+    def clear_section(self, section):
+        self._cp.remove_section(section)
+        
+    def get_options(self, section):
+        print 'get options'
+        self._load()
+        print 'after load'
 
-        raise AttributeError("No attribute: " + name)
+        options = {}
+        print self._cp.items(section)
+        for i in self._cp.items(section):
+            print 'i=', i
+            options[i[0]] = i[1]
 
-    def __setattr__(self, name, value):
-        cp = self.__dict__.get('_cp')
-        if cp:
-            return cp.set('CBMiner', name, value)
+        return options
 
-        return object.__setattr__(self, name, value)
-            
+    def set_option(self, section, name, value):
+        if self._cp.has_section(section) == False:
+            self._cp.add_section(section)
+
+        self._cp.set(section, name, value)
+
+    def get_option(self, section, name):
+        if self._cp.has_option(section, name):
+            return self._cp.get(section, name)
+        return None
+                
     def __init__(self):
         self._loaded = False
         self._cp = None
