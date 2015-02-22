@@ -1,0 +1,47 @@
+table name,Key Fields,sql field name,Datatype,length,description,Worksheet Column
+Employee,,Agency,Alphanumeric,2,Agency this employee works for,A
+Employee,,File-Type,Alphanumeric,1,Retiree or Active (R or A),B
+Employee,,Soc-Sec-No,Alphanumeric,9,SSN,C
+Employee,Primary,Employee-No,Alphanumeric,5,Employee ID Number,D
+Employee,,Employee-Last-Name,Alphanumeric,21,Last Name,E
+Employee,,Employee-First-Name,Alphanumeric,15,First Name,F
+Employee,,Employee-Mid-Initial,Alphanumeric,1,Middle Initial,G
+Employee,,Employee-Suffix,Alphanumeric,3,Name Suffix,H
+Employee,,Employee-Status,Alphanumeric,2,Employment status,I
+Employee,,Employee-Code,Alphanumeric,2,Type of Employee,J
+Employee,,Dept,Alphanumeric,2,Assigned Department,K
+Employee,,Div,Alphanumeric,2,Assigned Division,L
+Employee,,Class-Code,Alphanumeric,5,Job Code,M
+Employee,,Grade,Alphanumeric,3,Pay Grade,N
+Employee,,Step,Numeric,3,Pay Step,O
+Employee,,Exception-Code,Alphanumeric,2,Payroll exception code,P
+Employee,,Pos-No,Alphanumeric,3,Position Number,Q
+Employee,,Premium-Code,Alphanumeric,2,Premium Pay Code,R
+Employee,,Payroll-Type,Alphanumeric,1,Payroll Type (Active or Retiree),S
+Employee,,Payroll-Freq,Alphanumeric,1,Biweekly or Monthly,T
+Employee,,Hourly-Rate,Money,999.99,Hourly Pay Rate,U
+Employee,,Frequency-Rate,Money,99999.99,Payroll Cycle Rate,V
+Employee,,Fed-Marital-Status,Alphanumeric,1,Federal Tax Marital Status,W
+Employee,,Fed-Dependents,Numeric,2,Federal Tax Dependents Claimed,X
+Employee,,Fed-Extra-Wh,Money,999.99,Federal Tax Extra Withholding,Y
+Employee,,State-Marital-Status,Alphanumeric,1,AL Tax Marital Status,Z
+Employee,,State-Dependents,Numeric,2,AL Tax Dependents Claimed,AA
+Employee,,State-Extra-Wh,Money,999.99,AL Tax Extra Withholding,AB
+Employee,,City-Occup-Percent,percentage,9.9999,City Occupational Tax Percentage,AC
+Employee,,Birth-Date,date,8,Date of Birth (yymmdd),AD
+Employee,,Emp-Date,date,8,Date of Employment (yymmdd),AE
+Employee,,Civil-Serv-Date,date,8,Date entered Civil Service (yymmdd),AF
+Employee,,Marital-Status,Alphanumeric,1,Marital Status,AG
+Employee,,Sex,Alphanumeric,1,Gender,AH
+Employee,,Race,Alphanumeric,1,Ethnicity,AI
+Employee,,Supervisor,Alphanumeric,3,Supervisor Id,AJ
+Employee,,Payroll-Rule,Alphanumeric,10,Payroll Rule,AK
+Employee,,Freeze-Code,Alphanumeric,1,Employment Frozen at current rate flag,AL
+Employee,,Eic-Code,Alphanumeric,1,Earned Income Credit Flag,AM
+Employee,,Merit-Date,date,8,Date of next merit review (yymmdd),AN
+Employee,,Jeff-County-Tax   ,percentage,9.99999,Jefferson County Occupational Tax Percentage,AO
+Employee,,Sick-Bank-Member,Alphanumeric,1,Is this employee a member of a sick bank (Y/N),AP
+Employee,,Started-Sick-Bank,date,8,Date joined sick bank (ccyymmdd),AQ
+Employee,,Stopped-Sick-Bank,date,8,date stopped participating in sick bank (ccyymmdd),AR
+Employee,,Last-Sick-Contrib-Amt,money,999.99,Amount last contributed,AS
+Employee,,Date-Of-Last-Contrib,date,8,date last contributed (ccyymmdd),AT

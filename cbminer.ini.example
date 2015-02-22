@@ -1,0 +1,53 @@
+[CBMiner]
+debug=0
+
+[Database]
+# This is the database engine to use
+# Valid options are:
+#  sqlite - SQLite Database
+#  postgres - Postgresql
+#  mysql - MySQL
+#  mssql - Microsoft SQL Server
+#  oracle - Oracle server
+engine = mssql
+
+# This is the database name
+# For postgres/mysql/oracle
+#  this is just the database name
+# For mssql, this is the dsn
+# For sqlite, this is a path to a
+#   file on disk
+name = mydatabase
+
+# This is the driver to use
+#  You shouldn't have to mess with
+#  this. Options vary based on the
+#  engine you use. These are if
+#  you want to use a driver other
+#  than the default. Usually
+#  this will be commented out.
+#
+# Alternatives are:
+# postgres: pg8000
+# mysql: connector, oursql
+# mssql: pymssql
+# oracle: cx
+#driver = connector
+
+# This is the host the database is on.
+# This isn't required if the database is local.
+# This is only valid of the postgres, mysql,
+#  mssql, and oracle engines
+host = localhost
+
+# This is an optional port number to connect to
+#  This is only used by mssql
+#port = 5885
+
+# This is the username to connect to the
+#  database
+username = user1
+
+# This is the optional passwor to connect
+#  to the database
+password = mypassword

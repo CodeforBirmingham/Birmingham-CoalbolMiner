@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CB Miner</title>
+
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+	<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+
+    <script src="/js/cbminer.js"></script>
+  </head>
+  <body>
+    <div id="dbConfigDiv col-xs-12">
+      <h2>Database Configuration</h2>
+      <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+          Database
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+          <li role="presentation" class="dropdown-header">Select a database</li>
+          <li id="postgresql" role="presentation">postgresql</li>
+          <li id="mysql" role="presentation">mysql</li>
+          <li id="microsoft_sql" role="presentation">microsoft sql</li>
+          <li id="sqlite" role="presentation">sqlite</li>
+        </ul>
+        <div class="hidden" id="Form_Postgresql">
+          <p>
+            postgresql options
+          </p>
+        </div>
+        <div class="hidden" id="Form_Mysql">
+          <p>
+            mysql options
+          </p>
+        </div>
+        <div class="hidden" id="Form_Microsoftsql">
+          <p>
+            Microsoft SQL options
+          </p>
+        </div>
+        <div class="hidden" id="Form_Sqlite">
+          <p>
+            sqlite options
+          </p>
+        </div>
+
+        <button class="DatabaseSubmit btn btn-primary" type="button">Next</button>
+      </div>
+    </div>
+    <div id="schemaDiv" class="col-xs-12">
+      <h2>Upload a Schema</h2>
+      <form id="schemaUploadForm" enctype="multipart/form-data" name="schemaUploadForm" onsubmit="upload_schema(this); return false;">
+	<input type="file" name="schema">
+        <button class="SubmitSchema btn btn-primary" type="button" onclick="$('#schemaUploadForm').submit(); return false;">Submit</button>
+      </form>
+    </div>
+
+    <div id="tableDiv">
+      <h2>Upload a Table</h2>
+      <div class="dropdown">
+	<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+	  select table
+	  <span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+	  <li id="postgresql" role="presentation">table1</li>
+	  <li id="mysql" role="presentation">table2</li>
+	  <li id="microsoft_sql" role="presentation">table3</li>
+	</ul>
+	<button class="DatabaseSubmit btn btn-primary" type="button">Next</button>
+      </div>
+      <form id="tableUploadForm" enctype="multipart/form-data" name="tableUploadForm" onsubmit="upload_table(this); return false;">
+	<input type="file" name="table">
+	<button class="SubmitSchema btn btn-primary" type="button" onclick="$('#tableUploadForm').submit(); return false;">Next</button>
+      </form>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    
+    <script type="text/javascript">
+      $(document).ready(function() {
+        get_db_config(function(r) {
+          <!-- hide everything -->
+      
+          <!-- fill in some stuff -->
+	  if (r.engine == "postgresql") {
+	    $('#Form_Postgresql').removeClass("hidden");
+	  } else if (r.engine == "sqlite") {
+	    $('#Form_Sqlite').removeClass("hidden");
+	  }
+        });
+      });
+    </script>
+    
+  </body>
+
+</html>
